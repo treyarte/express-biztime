@@ -2,8 +2,6 @@ const express = require('express');
 const ExpressError = require('../expressError');
 const router = express.Router();
 const db = require('../db');
-const { route } = require('../app');
-const e = require('express');
 
 router.get('/', async (req, res, next) => {
   try {
@@ -53,7 +51,6 @@ router.put('/:code', async (req, res, next) => {
   try {
     const { name, description } = req.body;
     const { code } = req.params;
-    debugger;
     const results = await db.query(
       'UPDATE companies SET name=$1, description=$2 WHERE code = $3 RETURNING code, name, description',
       [name, description, code]
