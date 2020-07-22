@@ -6,9 +6,16 @@ const db = require('../db');
 const { createTestCompany } = require('./test_utils');
 
 let testCompany;
+let testInvoice;
 
 beforeEach(async () => {
   testCompany = await createTestCompany(db);
+  res = await db.query(
+    'INSERT INTO invoices (amt, comp_code) values (100, $1) RETURNING id, comp_code, amt, paid, add_date, paid_date',
+    [testCompany.code]
+  );
+
+  testInvoice = res.rows[0];
 });
 
 describe('/GET companies', () => {
@@ -23,6 +30,15 @@ describe('/GET companies/code', () => {
   test('Return a single company', async () => {
     const res = await request(app).get(`/companies/${testCompany.code}`);
     expect(res.statusCode).toBe(200);
+    testCompany.invoices = [
+      {
+        id: testInvoice.id,
+        amt: testInvoice.amt,
+        paid: testInvoice.paid,
+        add_date: expect.any(String),
+        paid_date: testInvoice.paid_date,
+      },
+    ];
     expect(res.body).toEqual({ company: testCompany });
   });
 
