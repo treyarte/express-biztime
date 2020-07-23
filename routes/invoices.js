@@ -30,7 +30,7 @@ router.get('/:id', async (req, res, next) => {
     const { id } = req.params;
     const results = await db.query(
       `SELECT id, amt, paid, add_date, paid_date, code, name, description 
-      FROM invoices JOIN companies ON companies.code = invoices.comp_code WHERE id = $1`,
+      FROM invoices LEFT JOIN companies ON companies.code = invoices.comp_code WHERE id = $1`,
       [id]
     );
 

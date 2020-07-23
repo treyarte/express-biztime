@@ -1,6 +1,7 @@
 const express = require('express');
 const ExpressError = require('../expressError');
 const router = express.Router();
+const slugify = require('slugify');
 const db = require('../db');
 
 router.get('/', async (req, res, next) => {
@@ -18,11 +19,11 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
   try {
     const { code, name, description } = req.body;
-
+    const slugCode = slugify(code, { lower: true, strict: true });
     debugger;
     const results = await db.query(
       `INSERT INTO companies (code, name, description) VALUES ($1, $2, $3) RETURNING code, name, description`,
-      [code, name, description]
+      [slugCode, name, description]
     );
     return res.status(201).json({ company: results.rows[0] });
   } catch (error) {
@@ -35,7 +36,7 @@ router.get('/:code', async (req, res, next) => {
     const { code } = req.params;
     const results = await db.query(
       `SELECT code, name, description, id, amt, paid, add_date, paid_date 
-      FROM companies JOIN invoices on invoices.comp_code = companies.code WHERE code = $1`,
+      FROM companies LEFT JOIN invoices on invoices.comp_code = companies.code WHERE code = $1`,
       [code]
     );
 
@@ -65,7 +66,7 @@ router.get('/:code', async (req, res, next) => {
 router.put('/:code', async (req, res, next) => {
   try {
     const { name, description } = req.body;
-    const { code } = req.params;
+    const code = slugify(req.params.code, { lower: true, strict: true });
     const results = await db.query(
       'UPDATE companies SET name=$1, description=$2 WHERE code = $3 RETURNING code, name, description',
       [name, description, code]

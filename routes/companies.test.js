@@ -57,8 +57,8 @@ describe('/POST companies', () => {
                       Japanese multinational video game developer and publisher`,
     };
     const res = await request(app).post('/companies').send(newCompany);
-    expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({ company: newCompany });
+    expect(res.statusCode).toBe(201);
   });
 });
 
